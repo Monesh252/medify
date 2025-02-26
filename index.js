@@ -11,7 +11,9 @@ app.use(express.json());
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use latest model
+const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash-exp",
+  });
 
 const generationConfig = {
     temperature: 0.7,
@@ -28,22 +30,23 @@ app.post("/weather", async (req, res) => {
             return res.status(400).json({ error: "City name is required" });
         }
 
-        // Requesting specific real-time weather details
-        const prompt = `Provide the weather details for ${city}. Include temperature, humidity, wind speed, and conditions.`;
+        // Use a clearer prompt to get real-time weather
+        const prompt = `Give me the current weather for ${city}. Include temperature, conditions, humidity, and wind speed.`;
 
         const chatSession = model.startChat({
             generationConfig,
-            history: [{ role: "user", parts: [{ text: city }] }],
+            history: [{ role: "user", parts: [{ text: prompt }] }],
         });
 
-        const result = await chatSession.sendMessage("Provide the weather details for"+prompt);
+        const result = await chatSession.sendMessage(prompt);
         const responseText = await result.response.text();
 
-        res.json({ response: responseText });
+        console.log("✅ AI Response:", responseText);
+        res.json({ response: responseText }); // ✅ Send response to frontend
     } catch (error) {
         console.error("❌ AI Error:", error);
         res.status(500).json({ error: "Failed to fetch weather data", details: error.message });
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
