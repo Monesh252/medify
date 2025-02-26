@@ -31,9 +31,7 @@
     try {
         const response = await fetch("http://localhost:3001/weather", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ city: city }),
         });
 
@@ -45,7 +43,7 @@
 
         responseContainer.innerHTML = `
             <h2>Weather in ${city}</h2>
-            <p>${data.response.replace(/\n/g, "<br>")}</p> 
+            <p>${data.response.replace(/\n/g, "<br>")}</p> <!-- Preserve formatting -->
         `;
         errorMessage.textContent = "";
     } catch (error) {
@@ -54,6 +52,7 @@
         errorMessage.textContent = "Error: Unable to fetch weather data.";
     }
 });
+
   </script>
 </body>
 </html>
