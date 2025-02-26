@@ -1,10 +1,10 @@
-# Use the official Node.js 18 LTS image
+# Use the official Node.js image as the base image
 FROM node:18
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker caching
+# Copy package.json and package-lock.json into the container
 COPY package*.json ./
 
 # Install dependencies
@@ -13,8 +13,11 @@ RUN npm install
 # Copy the rest of the application files into the container
 COPY . .
 
-# Expose the port your app runs on
+# Expose the port the application runs on
 EXPOSE 3001
 
-# Set environment variables from the .env file (Docker Compose is better for this)
-CMD ["node", "index.js"]
+# Define the command to run the application
+
+
+# Set environment variable from .env file
+CMD ["sh", "-c", "node index.js"]
