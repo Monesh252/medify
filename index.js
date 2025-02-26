@@ -1,52 +1,58 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>City Info App</title>
+  <link rel="stylesheet" href="style.css"> <!-- Link to CSS file -->
+</head>
+<body>
+  <div class="container">
+    <h1>City Information</h1>
+    <input type="text" placeholder="Enter city name" id="cityInput">
+    <button id="getInfoButton">Get Info</button>
+    <div id="responseContainer"></div>
+    <p id="errorMessage"></p>
+  </div>
 
-const app = express();
-const PORT = 3001;
+  <script>
+    document.querySelector("#getInfoButton").addEventListener("click", async () => {
+    const city = document.querySelector("#cityInput").value;
+    const responseContainer = document.querySelector("#responseContainer");
+    const errorMessage = document.querySelector("#errorMessage");
 
-app.use(cors());
-app.use(express.json());
+    if (!city.trim()) {
+        errorMessage.textContent = "Please enter a city name.";
+        return;
+    }
 
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp",
-  });
+    responseContainer.innerHTML = "<p>Fetching details...</p>";
 
-const generationConfig = {
-    temperature: 0.7,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 512,
-    responseMimeType: "text/plain",
-};
-
-app.post("/weather", async (req, res) => {
     try {
-        const { city } = req.body;
-        if (!city) {
-            return res.status(400).json({ error: "City name is required" });
-        }
-
-        // Use a clearer prompt to get real-time weather
-        const prompt = `Give me the current weather for ${city}. Include temperature, conditions, humidity, and wind speed.`;
-
-        const chatSession = model.startChat({
-            generationConfig,
-            history: [{ role: "user", parts: [{ text: prompt }] }],
+        const response = await fetch("http://localhost:3001/weather", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ city: city }),
         });
 
-        const result = await chatSession.sendMessage(prompt);
-        const responseText = await result.response.text();
+        if (!response.ok) {
+            throw new Error("Failed to fetch weather data.");
+        }
 
-        console.log("AI Response:", responseText);
-        res.json({ response: responseText }); // Send response to frontend
+        const data = await response.json();
+
+        responseContainer.innerHTML = `
+            <h2>Weather in ${city}</h2>
+            <p>${data.response.replace(/\n/g, "<br>")}</p> <!-- Preserve formatting -->
+        `;
+        errorMessage.textContent = "";
     } catch (error) {
-        console.error("AI Error:", error);
-        res.status(500).json({ error: "Failed to fetch weather data", details: error.message });
+        console.error("Error:", error);
+        responseContainer.innerHTML = "";
+        errorMessage.textContent = "Error: Unable to fetch weather data.";
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+  </script>
+</body>
+</html>
