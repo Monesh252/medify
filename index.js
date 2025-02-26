@@ -41,12 +41,12 @@ app.post("/weather", async (req, res) => {
         const result = await chatSession.sendMessage(prompt);
         const responseText = await result.response.text();
 
-        console.log("✅ AI Response:", responseText);
-        res.json({ response: responseText }); // ✅ Send response to frontend
+        console.log("AI Response:", responseText);
+        res.json({ response: responseText }); // Send response to frontend
     } catch (error) {
-        console.error("❌ AI Error:", error);
+        console.error("AI Error:", error);
         res.status(500).json({ error: "Failed to fetch weather data", details: error.message });
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
